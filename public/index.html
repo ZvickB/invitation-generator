@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Invitation Layout Editor</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="editor-panel" aria-label="Layout controls">
+        <div class="panel-header">
+          <div>
+            <h1>Invitation Layout</h1>
+            <p>Move each text block, tune the style, then export the PDF.</p>
+          </div>
+          <button class="icon-button" id="saveLayoutButton" type="button" title="Save current project">Save</button>
+        </div>
+
+        <section class="project-panel" aria-label="Saved projects">
+          <label>
+            <span>Project</span>
+            <select id="projectSelect"></select>
+          </label>
+          <div class="project-actions">
+            <button class="secondary-button" id="newProjectButton" type="button">New</button>
+            <button class="secondary-button" id="duplicateProjectButton" type="button">Duplicate</button>
+            <button class="secondary-button danger-button" id="deleteProjectButton" type="button">Delete</button>
+          </div>
+        </section>
+
+        <div class="toolbar">
+          <button class="secondary-button" id="bringForwardButton" type="button">Bring forward</button>
+          <button class="secondary-button" id="sendBackwardButton" type="button">Send backward</button>
+        </div>
+
+        <form id="blockForm" class="block-form">
+          <label>
+            <span>Selected block</span>
+            <select id="blockSelect"></select>
+          </label>
+
+          <label>
+            <span>Text</span>
+            <textarea id="blockText" rows="6"></textarea>
+          </label>
+
+          <div class="control-grid">
+            <label>
+              <span>X</span>
+              <input id="blockX" type="number" step="1" />
+            </label>
+            <label>
+              <span>Y</span>
+              <input id="blockY" type="number" step="1" />
+            </label>
+            <label>
+              <span>Width</span>
+              <input id="blockWidth" type="number" step="1" min="8" />
+            </label>
+            <label>
+              <span>Height</span>
+              <input id="blockHeight" type="number" step="1" min="8" />
+            </label>
+          </div>
+
+          <div class="control-grid">
+            <label>
+              <span>Font</span>
+              <select id="blockFont">
+                <option>InvitationHebrew</option>
+                <option>Libertinus Math</option>
+                <option>Monsieur La Doulaise</option>
+                <option>InvitationSerif</option>
+                <option>David Libre</option>
+                <option>David Libre Regular</option>
+                <option>Dancing Script</option>
+              </select>
+            </label>
+            <label>
+              <span>Size</span>
+              <input id="blockFontSize" type="number" step="0.5" min="4" />
+            </label>
+            <label>
+              <span>Weight</span>
+              <select id="blockWeight">
+                <option value="400">Regular</option>
+                <option value="700">Bold</option>
+              </select>
+            </label>
+            <label>
+              <span>Layer</span>
+              <select id="blockZ">
+                <option value="0">0 content</option>
+                <option value="1">1 English name</option>
+                <option value="2">2 Hebrew name</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="control-grid">
+            <label>
+              <span>Align</span>
+              <select id="blockAlign">
+                <option value="left">Left</option>
+                <option value="center">Center</option>
+                <option value="right">Right</option>
+              </select>
+            </label>
+            <label>
+              <span>Direction</span>
+              <select id="blockDirection">
+                <option value="rtl">RTL</option>
+                <option value="ltr">LTR</option>
+              </select>
+            </label>
+            <label>
+              <span>Line height</span>
+              <input id="blockLineHeight" type="number" step="0.05" min="0.5" />
+            </label>
+            <label>
+              <span>Color</span>
+              <input id="blockColor" type="color" />
+            </label>
+          </div>
+        </form>
+
+        <div class="actions">
+          <div class="segmented" role="radiogroup" aria-label="Output format">
+            <label>
+              <input type="radio" name="outputMode" value="single" checked />
+              <span>Single</span>
+            </label>
+            <label>
+              <input type="radio" name="outputMode" value="two-up" />
+              <span>2-up Letter</span>
+            </label>
+          </div>
+          <button class="primary-button" id="generateButton" type="button">Generate PDF</button>
+        </div>
+
+        <p class="status" id="statusText" aria-live="polite"></p>
+      </section>
+
+      <section class="preview-panel" aria-label="Movable invitation preview">
+        <div class="stage-wrap">
+          <div class="preview-stage" id="previewStage">
+            <img src="/template-preview.png" alt="Invitation template preview" draggable="false" />
+            <div id="blockLayer"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script src="/script.js"></script>
+  </body>
+</html>

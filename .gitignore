@@ -1,0 +1,10 @@
+node_modules/
+outputs/
+previews/*
+!previews/blank-150dpi.png
+
+.env
+.env.*
+*.log
+
+Screenshot*.png
