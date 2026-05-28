@@ -293,6 +293,26 @@ function createProject(name, sourceLayout) {
   return project;
 }
 
+function projectNameForTemplate(templateLayout) {
+  return `${templateLayout.template.name} Invitation`;
+}
+
+function openTemplateProject(templateId) {
+  const templateLayout = templateLayouts.find((item) => item.template.id === templateId);
+  if (!templateLayout) return;
+
+  const existing = projects.find((project) => project.layout?.template?.id === templateId);
+  if (existing) {
+    localStorage.setItem(`${storageKey}:current`, existing.id);
+    loadProject(existing.id);
+    return;
+  }
+
+  createProject(projectNameForTemplate(templateLayout), templateLayout);
+  localStorage.setItem(`${storageKey}:current`, currentProjectId);
+  setStatus(`Created ${templateLayout.template.name} project.`);
+}
+
 function renderBlockOptions() {
   blockSelect.innerHTML = "";
   layout.blocks.forEach((block) => {
@@ -586,6 +606,10 @@ addLineButton.addEventListener("click", () => {
 projectSelect.addEventListener("change", () => {
   localStorage.setItem(`${storageKey}:current`, projectSelect.value);
   loadProject(projectSelect.value);
+});
+
+templateSelect.addEventListener("change", () => {
+  openTemplateProject(templateSelect.value);
 });
 
 newProjectButton.addEventListener("click", () => {
