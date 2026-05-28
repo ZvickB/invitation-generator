@@ -16,6 +16,21 @@ Open:
 http://localhost:3010
 ```
 
+## Deploy To Vercel
+
+```powershell
+npm install -g vercel
+vercel
+```
+
+The Vercel version uses serverless API routes in `api/` for PDF generation,
+font serving, layout loading, and the template preview.
+
+Project saves are currently browser-local through localStorage. On Vercel,
+`POST /api/layout` validates and returns the layout, but it does not permanently
+write `layout.json`. A hosted database, such as Supabase, should own shared
+saved projects later.
+
 ## What It Does
 
 - Uses `templates/blank.pdf` as the invitation background.

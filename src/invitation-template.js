@@ -210,6 +210,7 @@ async function createTwoUpLetterPdf(inputLayout) {
 module.exports = {
   createSingleInvitationPdf,
   createTwoUpLetterPdf,
+  normalizeLayout,
   previewPngPath,
   readLayout,
   writeLayout,

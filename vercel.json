@@ -1,0 +1,27 @@
+{
+  "version": 2,
+  "rewrites": [
+    {
+      "source": "/fonts/:name",
+      "destination": "/api/font?name=:name"
+    },
+    {
+      "source": "/template-preview.png",
+      "destination": "/api/template-preview"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/$1"
+    }
+  ],
+  "functions": {
+    "api/**/*.js": {
+      "includeFiles": [
+        "assets/fonts/**",
+        "templates/**",
+        "previews/blank-150dpi.png",
+        "layout.json"
+      ]
+    }
+  }
+}

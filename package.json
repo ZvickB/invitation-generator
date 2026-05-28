@@ -1,6 +1,7 @@
 {
   "scripts": {
     "start": "node src/server.js",
+    "vercel-build": "node -e \"console.log('No build step needed')\"",
     "make-two-up": "node tools/make-two-up-letter.js",
     "pdf-to-png": "node tools/pdf-to-png.js"
   },

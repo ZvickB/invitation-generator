@@ -390,7 +390,12 @@ async function saveLayout() {
       const error = await response.json();
       throw new Error(error.error || "Could not save layout");
     }
-    setStatus("Project saved locally, and current layout saved as the template.");
+    const result = await response.json();
+    setStatus(
+      result.savedToServer === false
+        ? "Project saved locally. Server template saves need a database on Vercel."
+        : "Project saved locally, and current layout saved as the template."
+    );
   } finally {
     saveLayoutButton.disabled = false;
   }
