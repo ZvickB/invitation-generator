@@ -391,8 +391,12 @@ function syncControls() {
   controls.text.value = block.text;
   controls.x.value = Math.round(block.x);
   controls.y.value = Math.round(block.y);
-  controls.width.value = Math.round(block.width);
-  controls.height.value = Math.round(block.height);
+  controls.width.min = block.type === "line" ? "0.5" : "8";
+  controls.height.min = block.type === "line" ? "0.5" : "8";
+  controls.width.step = block.type === "line" ? "0.5" : "1";
+  controls.height.step = block.type === "line" ? "0.5" : "1";
+  controls.width.value = block.type === "line" ? roundToHalf(block.width) : Math.round(block.width);
+  controls.height.value = block.type === "line" ? roundToHalf(block.height) : Math.round(block.height);
   controls.fontFamily.value = block.fontFamily;
   controls.fontSize.value = block.fontSize;
   controls.fontWeight.value = block.fontWeight;
@@ -401,6 +405,10 @@ function syncControls() {
   controls.direction.value = block.direction;
   controls.lineHeight.value = block.lineHeight;
   controls.color.value = block.color;
+}
+
+function roundToHalf(value) {
+  return Math.round(Number(value) * 2) / 2;
 }
 
 function selectBlock(id) {
