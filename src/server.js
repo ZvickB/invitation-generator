@@ -5,7 +5,9 @@ const {
   createSingleInvitationPdf,
   createTwoUpLetterPdf,
   previewPngPath,
+  getPreviewPngPath,
   readLayout,
+  readTemplateLayouts,
   writeLayout,
 } = require("./invitation-template");
 
@@ -96,6 +98,11 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
+    if (req.method === "GET" && url.pathname === "/api/templates") {
+      sendJson(res, 200, readTemplateLayouts());
+      return;
+    }
+
     if (req.method === "POST" && url.pathname === "/api/layout") {
       const body = JSON.parse(await readBody(req));
       sendJson(res, 200, writeLayout(body));
@@ -103,7 +110,9 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (req.method === "GET" && url.pathname === "/template-preview.png") {
-      send(res, 200, fs.readFileSync(previewPngPath), { "Content-Type": "image/png" });
+      send(res, 200, fs.readFileSync(getPreviewPngPath(url.searchParams.get("preview"))), {
+        "Content-Type": "image/png",
+      });
       return;
     }
 

@@ -7,6 +7,9 @@ const projectRoot = path.resolve(__dirname, "..");
 const templatePdfPath = path.join(projectRoot, "templates", "blank.pdf");
 const previewPngPath = path.join(projectRoot, "previews", "blank-150dpi.png");
 const layoutPath = path.join(projectRoot, "layout.json");
+const layoutsDir = path.join(projectRoot, "layouts");
+const templatesDir = path.join(projectRoot, "templates");
+const previewsDir = path.join(projectRoot, "previews");
 
 const defaultPage = {
   width: 396,
@@ -34,6 +37,19 @@ function readLayout() {
   return JSON.parse(fs.readFileSync(layoutPath, "utf8"));
 }
 
+function readTemplateLayouts() {
+  const layouts = [readLayout()];
+  if (fs.existsSync(layoutsDir)) {
+    fs.readdirSync(layoutsDir)
+      .filter((fileName) => fileName.endsWith(".json"))
+      .sort()
+      .forEach((fileName) => {
+        layouts.push(JSON.parse(fs.readFileSync(path.join(layoutsDir, fileName), "utf8")));
+      });
+  }
+  return layouts.map(normalizeLayout);
+}
+
 function writeLayout(layout) {
   const normalized = normalizeLayout(layout);
   fs.writeFileSync(layoutPath, `${JSON.stringify(normalized, null, 2)}\n`);
@@ -45,6 +61,7 @@ function normalizeLayout(layout = {}) {
   const blocks = Array.isArray(layout.blocks) ? layout.blocks : [];
 
   return {
+    template: normalizeTemplate(layout.template),
     page: {
       width: Number(page.width) || defaultPage.width,
       height: Number(page.height) || defaultPage.height,
@@ -66,7 +83,17 @@ function normalizeLayout(layout = {}) {
       align: ["left", "center", "right"].includes(block.align) ? block.align : "left",
       direction: block.direction === "ltr" ? "ltr" : "rtl",
       zIndex: layerForBlock(block),
+      rotation: numberOr(block.rotation, 0),
     })),
+  };
+}
+
+function normalizeTemplate(template = {}) {
+  return {
+    id: String(template.id || "classic"),
+    name: String(template.name || "Classic"),
+    pdf: path.basename(String(template.pdf || "blank.pdf")),
+    preview: path.basename(String(template.preview || "blank-150dpi.png")),
   };
 }
 
@@ -106,6 +133,7 @@ function drawTextBlock(ctx, block) {
   const lines = String(block.text || "").split(/\r?\n/);
   const lineStep = block.fontSize * block.lineHeight;
   const hasNameHalo = block.id === "hebrewName" || block.id === "englishName";
+  const rotation = numberOr(block.rotation, 0);
 
   setFont(ctx, block);
   ctx.fillStyle = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
@@ -120,6 +148,13 @@ function drawTextBlock(ctx, block) {
     ctx.lineWidth = Math.max(3, block.fontSize * 0.13);
   }
 
+  ctx.save();
+  if (rotation) {
+    ctx.translate(block.x + block.width / 2, block.y + block.height / 2);
+    ctx.rotate((rotation * Math.PI) / 180);
+    ctx.translate(-(block.x + block.width / 2), -(block.y + block.height / 2));
+  }
+
   lines.forEach((line, index) => {
     const y = block.y + index * lineStep;
     if (y > block.y + block.height) return;
@@ -129,6 +164,7 @@ function drawTextBlock(ctx, block) {
     }
     ctx.fillText(line, x, y, block.width);
   });
+  ctx.restore();
 }
 
 function drawLineBlock(ctx, block) {
@@ -161,7 +197,7 @@ function drawOverlayPng(inputLayout) {
 
 async function createSingleInvitationPdf(inputLayout) {
   const layout = normalizeLayout(inputLayout || readLayout());
-  const sourceBytes = fs.readFileSync(templatePdfPath);
+  const sourceBytes = fs.readFileSync(getTemplatePdfPath(layout));
   const pdfDoc = await PDFDocument.load(sourceBytes);
   const pdfPage = pdfDoc.getPage(0);
 
@@ -174,6 +210,22 @@ async function createSingleInvitationPdf(inputLayout) {
   });
 
   return pdfDoc.save();
+}
+
+function getTemplatePdfPath(layout) {
+  const filePath = path.normalize(path.join(templatesDir, layout.template.pdf));
+  if (!filePath.startsWith(templatesDir) || !fs.existsSync(filePath)) {
+    return templatePdfPath;
+  }
+  return filePath;
+}
+
+function getPreviewPngPath(previewName = "blank-150dpi.png") {
+  const filePath = path.normalize(path.join(previewsDir, path.basename(previewName)));
+  if (!filePath.startsWith(previewsDir) || !fs.existsSync(filePath)) {
+    return previewPngPath;
+  }
+  return filePath;
 }
 
 function getFitScale(sourceWidth, sourceHeight, boxWidth, boxHeight) {
@@ -224,7 +276,9 @@ module.exports = {
   createSingleInvitationPdf,
   createTwoUpLetterPdf,
   normalizeLayout,
+  getPreviewPngPath,
   previewPngPath,
   readLayout,
+  readTemplateLayouts,
   writeLayout,
 };

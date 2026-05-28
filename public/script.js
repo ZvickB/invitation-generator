@@ -8,6 +8,7 @@ const bringForwardButton = document.querySelector("#bringForwardButton");
 const sendBackwardButton = document.querySelector("#sendBackwardButton");
 const addLineButton = document.querySelector("#addLineButton");
 const projectSelect = document.querySelector("#projectSelect");
+const templateSelect = document.querySelector("#templateSelect");
 const newProjectButton = document.querySelector("#newProjectButton");
 const duplicateProjectButton = document.querySelector("#duplicateProjectButton");
 const deleteProjectButton = document.querySelector("#deleteProjectButton");
@@ -35,6 +36,7 @@ let baseLayout = null;
 let selectedId = null;
 let dragState = null;
 let projects = [];
+let templateLayouts = [];
 let currentProjectId = null;
 
 function pageToCss(value, axis) {
@@ -111,6 +113,10 @@ function makeLineBlock(overrides = {}) {
   };
 }
 
+function currentTemplateLayout() {
+  return templateLayouts.find((item) => item.template.id === templateSelect.value) || baseLayout;
+}
+
 function layerForBlock(block) {
   if (block.id === "englishName") return 1;
   if (block.id === "hebrewName") return 2;
@@ -125,6 +131,10 @@ function normalizeLayers(sourceLayout) {
     zIndex: layerForBlock(block),
   }));
   return normalized;
+}
+
+function normalizeProjectLayout(sourceLayout) {
+  return upgradeGrandparentsBlocks(sourceLayout);
 }
 
 function upgradeGrandparentsBlocks(sourceLayout) {
@@ -226,6 +236,22 @@ function renderProjectOptions() {
   projectSelect.value = currentProjectId || "";
 }
 
+function renderTemplateOptions() {
+  templateSelect.innerHTML = "";
+  templateLayouts.forEach((templateLayout) => {
+    const option = document.createElement("option");
+    option.value = templateLayout.template.id;
+    option.textContent = templateLayout.template.name;
+    templateSelect.append(option);
+  });
+}
+
+function updateStagePreview() {
+  const preview = layout?.template?.preview || "blank-150dpi.png";
+  const image = stage.querySelector("img");
+  image.src = `/template-preview.png?preview=${encodeURIComponent(preview)}`;
+}
+
 function saveCurrentProjectToStorage() {
   const project = currentProject();
   if (!project) return;
@@ -239,12 +265,14 @@ function loadProject(projectId) {
   const project = projects.find((item) => item.id === projectId);
   if (!project) return;
   currentProjectId = project.id;
-  layout = upgradeGrandparentsBlocks(project.layout);
+  layout = normalizeProjectLayout(project.layout);
   project.layout = clone(layout);
   writeProjects();
+  templateSelect.value = layout.template?.id || "classic";
   selectedId = layout.blocks[0]?.id;
   renderProjectOptions();
   renderBlockOptions();
+  updateStagePreview();
   syncControls();
   renderBlocks();
   setStatus(`Opened ${project.name}.`);
@@ -290,6 +318,11 @@ function blockStyle(block) {
     direction: block.direction,
     zIndex: block.zIndex,
   };
+
+  if (block.rotation) {
+    style.transform = `rotate(${block.rotation}deg)`;
+    style.transformOrigin = "center";
+  }
 
   if (block.type === "line") {
     style.background = block.color;
@@ -391,14 +424,16 @@ function readControlPatch() {
 }
 
 async function loadLayout() {
-  const response = await fetch("/api/layout");
+  const response = await fetch("/api/templates");
   if (!response.ok) throw new Error("Could not load layout");
-  baseLayout = await response.json();
-  baseLayout = upgradeGrandparentsBlocks(baseLayout);
+  templateLayouts = await response.json();
+  templateLayouts = templateLayouts.map(normalizeProjectLayout);
+  baseLayout = templateLayouts[0];
+  renderTemplateOptions();
   projects = readProjects();
 
   if (!projects.length) {
-    createProject(makeProjectName("Invitation"), baseLayout);
+    createProject(makeProjectName("Invitation"), currentTemplateLayout());
     setStatus("Created your first local project.");
     return;
   }
@@ -556,7 +591,7 @@ projectSelect.addEventListener("change", () => {
 newProjectButton.addEventListener("click", () => {
   const name = prompt("Project name", makeProjectName("Invitation"));
   if (!name || !name.trim()) return;
-  createProject(name.trim(), baseLayout);
+  createProject(name.trim(), currentTemplateLayout());
   localStorage.setItem(`${storageKey}:current`, currentProjectId);
 });
 

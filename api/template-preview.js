@@ -1,5 +1,5 @@
 const fs = require("fs");
-const { previewPngPath } = require("../src/invitation-template");
+const { getPreviewPngPath } = require("../src/invitation-template");
 
 module.exports = function handler(req, res) {
   if (req.method !== "GET") {
@@ -11,5 +11,5 @@ module.exports = function handler(req, res) {
   res.statusCode = 200;
   res.setHeader("Content-Type", "image/png");
   res.setHeader("Cache-Control", "public, max-age=3600");
-  res.end(fs.readFileSync(previewPngPath));
+  res.end(fs.readFileSync(getPreviewPngPath(req.query.preview)));
 };

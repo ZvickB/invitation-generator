@@ -1,4 +1,10 @@
 {
+  "template": {
+    "id": "classic",
+    "name": "Classic",
+    "pdf": "blank.pdf",
+    "preview": "blank-150dpi.png"
+  },
   "page": {
     "width": 396,
     "height": 612
