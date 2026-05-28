@@ -419,8 +419,10 @@ function updateSelected(patch) {
 }
 
 function clampBlock(block) {
-  block.width = Math.max(8, Math.min(block.width, layout.page.width - block.x));
-  block.height = Math.max(8, Math.min(block.height, layout.page.height - block.y));
+  const minWidth = block.type === "line" ? 0.5 : 8;
+  const minHeight = block.type === "line" ? 0.5 : 8;
+  block.width = Math.max(minWidth, Math.min(block.width, layout.page.width - block.x));
+  block.height = Math.max(minHeight, Math.min(block.height, layout.page.height - block.y));
   block.x = Math.max(0, Math.min(block.x, layout.page.width - block.width));
   block.y = Math.max(0, Math.min(block.y, layout.page.height - block.height));
 }
