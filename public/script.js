@@ -6,6 +6,7 @@ const saveLayoutButton = document.querySelector("#saveLayoutButton");
 const generateButton = document.querySelector("#generateButton");
 const bringForwardButton = document.querySelector("#bringForwardButton");
 const sendBackwardButton = document.querySelector("#sendBackwardButton");
+const addLineButton = document.querySelector("#addLineButton");
 const projectSelect = document.querySelector("#projectSelect");
 const newProjectButton = document.querySelector("#newProjectButton");
 const duplicateProjectButton = document.querySelector("#duplicateProjectButton");
@@ -68,6 +69,7 @@ function clone(value) {
 
 function makeTextBlock(overrides) {
   return {
+    type: "text",
     id: "block",
     label: "Block",
     text: "",
@@ -82,6 +84,28 @@ function makeTextBlock(overrides) {
     color: "#151022",
     align: "center",
     direction: "rtl",
+    zIndex: 0,
+    ...overrides,
+  };
+}
+
+function makeLineBlock(overrides = {}) {
+  return {
+    type: "line",
+    id: `line-${Date.now()}`,
+    label: "Line",
+    text: "",
+    x: 38,
+    y: 118,
+    width: 3,
+    height: 360,
+    fontFamily: "InvitationHebrew",
+    fontSize: 10,
+    fontWeight: "400",
+    lineHeight: 1,
+    color: "#151022",
+    align: "left",
+    direction: "ltr",
     zIndex: 0,
     ...overrides,
   };
@@ -252,7 +276,7 @@ function renderBlockOptions() {
 }
 
 function blockStyle(block) {
-  return {
+  const style = {
     left: pageToCss(block.x, "x"),
     top: pageToCss(block.y, "y"),
     width: pageToCss(block.width, "x"),
@@ -266,6 +290,13 @@ function blockStyle(block) {
     direction: block.direction,
     zIndex: block.zIndex,
   };
+
+  if (block.type === "line") {
+    style.background = block.color;
+    style.fontSize = "0";
+  }
+
+  return style;
 }
 
 function renderBlocks() {
@@ -275,10 +306,12 @@ function renderBlocks() {
     .forEach((block) => {
       const element = document.createElement("button");
       element.type = "button";
-      element.className = `layout-block${block.id === selectedId ? " is-selected" : ""}`;
+      element.className = `layout-block ${block.type === "line" ? "line-block" : "text-block"}${
+        block.id === selectedId ? " is-selected" : ""
+      }`;
       element.dataset.id = block.id;
       element.dir = block.direction;
-      element.textContent = block.text;
+      element.textContent = block.type === "line" ? "" : block.text;
 
       Object.assign(element.style, blockStyle(block));
 
@@ -295,6 +328,13 @@ function syncControls() {
 
   selectedId = block.id;
   blockSelect.value = block.id;
+  controls.text.disabled = block.type === "line";
+  controls.fontFamily.disabled = block.type === "line";
+  controls.fontSize.disabled = block.type === "line";
+  controls.fontWeight.disabled = block.type === "line";
+  controls.align.disabled = block.type === "line";
+  controls.direction.disabled = block.type === "line";
+  controls.lineHeight.disabled = block.type === "line";
   controls.text.value = block.text;
   controls.x.value = Math.round(block.x);
   controls.y.value = Math.round(block.y);
@@ -495,6 +535,19 @@ Object.values(controls).forEach((control) => {
 blockSelect.addEventListener("change", () => selectBlock(blockSelect.value));
 saveLayoutButton.addEventListener("click", () => saveLayout().catch((error) => alert(error.message)));
 generateButton.addEventListener("click", () => generatePdf().catch((error) => alert(error.message)));
+addLineButton.addEventListener("click", () => {
+  const lineNumber = layout.blocks.filter((block) => block.type === "line").length + 1;
+  const block = makeLineBlock({
+    id: `line-${Date.now()}`,
+    label: `Line ${lineNumber}`,
+  });
+  layout.blocks.push(block);
+  selectedId = block.id;
+  renderBlockOptions();
+  syncControls();
+  renderBlocks();
+  saveCurrentProjectToStorage();
+});
 projectSelect.addEventListener("change", () => {
   localStorage.setItem(`${storageKey}:current`, projectSelect.value);
   loadProject(projectSelect.value);

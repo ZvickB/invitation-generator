@@ -120,7 +120,7 @@ p {
 
 .toolbar {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
   gap: 10px;
   margin-bottom: 16px;
 }
@@ -314,6 +314,12 @@ button:focus-visible {
   white-space: pre-line;
   overflow: visible;
   cursor: move;
+}
+
+.line-block {
+  overflow: visible;
+  min-width: 2px;
+  min-height: 2px;
 }
 
 .layout-block:hover,

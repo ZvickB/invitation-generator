@@ -50,6 +50,7 @@ function normalizeLayout(layout = {}) {
       height: Number(page.height) || defaultPage.height,
     },
     blocks: blocks.map((block, index) => ({
+      type: block.type === "line" ? "line" : "text",
       id: String(block.id || `block-${index + 1}`),
       label: String(block.label || block.id || `Block ${index + 1}`),
       text: String(block.text ?? ""),
@@ -130,6 +131,12 @@ function drawTextBlock(ctx, block) {
   });
 }
 
+function drawLineBlock(ctx, block) {
+  const rgb = hexToRgb(block.color);
+  ctx.fillStyle = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+  ctx.fillRect(block.x, block.y, block.width, block.height);
+}
+
 function drawOverlayPng(inputLayout) {
   const layout = normalizeLayout(inputLayout || readLayout());
   const scale = 4;
@@ -141,7 +148,13 @@ function drawOverlayPng(inputLayout) {
 
   [...layout.blocks]
     .sort((a, b) => a.zIndex - b.zIndex)
-    .forEach((block) => drawTextBlock(ctx, block));
+    .forEach((block) => {
+      if (block.type === "line") {
+        drawLineBlock(ctx, block);
+        return;
+      }
+      drawTextBlock(ctx, block);
+    });
 
   return canvas.toBuffer("image/png");
 }
