@@ -22,6 +22,7 @@ const fontFiles = [
   { path: path.join(fontDir, "DavidLibre-Regular.ttf"), family: "David Libre Regular" },
   { path: path.join(fontDir, "DavidLibre-Bold.ttf"), family: "David Libre" },
   { path: path.join(fontDir, "LibertinusMath-Regular.ttf"), family: "Libertinus Math" },
+  { path: path.join(fontDir, "GveretLevin-Regular.ttf"), family: "Gveret Levin" },
   { path: path.join(fontDir, "DancingScript.ttf"), family: "Dancing Script" },
   { path: path.join(fontDir, "MonsieurLaDoulaise-Regular.ttf"), family: "Monsieur La Doulaise" },
   { path: path.join(fontDir, "CormorantGaramond.ttf"), family: "InvitationSerif" },
