@@ -3,6 +3,7 @@ outputs/
 previews/*
 !previews/blank-150dpi.png
 !previews/verbose_blank-150dpi.png
+!previews/verbose_clean-150dpi.png
 
 .env
 .env.*

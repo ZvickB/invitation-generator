@@ -134,7 +134,13 @@ function normalizeLayers(sourceLayout) {
 }
 
 function normalizeProjectLayout(sourceLayout) {
-  return upgradeGrandparentsBlocks(sourceLayout);
+  const normalized = upgradeGrandparentsBlocks(sourceLayout);
+  if (normalized.template?.id === "verbose") {
+    normalized.template.pdf = "verbose_clean.pdf";
+    normalized.template.preview = "verbose_clean-150dpi.png";
+    normalized.blocks = normalized.blocks.filter((block) => block.id !== "leftLineMask");
+  }
+  return normalized;
 }
 
 function upgradeGrandparentsBlocks(sourceLayout) {
